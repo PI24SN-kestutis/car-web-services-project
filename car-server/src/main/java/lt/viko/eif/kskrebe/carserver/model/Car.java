@@ -49,7 +49,7 @@ public class Car {
     private String model;
 
     /** Pagaminimo metai, pvz., 2022. */
-    @Column(nullable = false)
+    @Column(name = "manufacture_year", nullable = false)
     private int year;
 
     /** Kaina eurais. Naudoja {@code float} tipą primityvių tipų demonstracijai. */

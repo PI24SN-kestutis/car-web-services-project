@@ -25,24 +25,45 @@ public class ExportService {
     }
 
     /**
-     * Sugeneruoja HTML failą pagal automobilių sąrašą.
+     * Sugeneruoja tik XML failą pagal automobilių sąrašą.
      *
      * @param cars automobilių sąrašas
-     * @return sugeneruoto HTML failo kelias
+     * @return sugeneruoto XML failo kelias
      */
-    public Path exportHtml(List<CarView> cars) {
-        Path xml = xmlExportService.exportCars(cars);
-        return transformService.transformXmlToHtml(xml);
+    public Path exportXml(List<CarView> cars) {
+        return xmlExportService.exportCars(cars);
     }
 
     /**
-     * Sugeneruoja PDF failą pagal automobilių sąrašą.
+     * Sugeneruoja XML ir HTML failus pagal automobilių sąrašą.
      *
      * @param cars automobilių sąrašas
-     * @return sugeneruoto PDF failo kelias
+     * @return sugeneruotų failų keliai
      */
-    public Path exportPdf(List<CarView> cars) {
+    public ExportResult exportHtml(List<CarView> cars) {
         Path xml = xmlExportService.exportCars(cars);
-        return transformService.transformXmlToPdf(xml);
+        Path html = transformService.transformXmlToHtml(xml);
+        return new ExportResult(xml, html);
+    }
+
+    /**
+     * Sugeneruoja XML ir PDF failus pagal automobilių sąrašą.
+     *
+     * @param cars automobilių sąrašas
+     * @return sugeneruotų failų keliai
+     */
+    public ExportResult exportPdf(List<CarView> cars) {
+        Path xml = xmlExportService.exportCars(cars);
+        Path pdf = transformService.transformXmlToPdf(xml);
+        return new ExportResult(xml, pdf);
+    }
+
+    /**
+     * Paprastas rezultato objektas, skirtas grąžinti XML ir tikslinio failo kelius.
+     *
+     * @param xmlPath XML failo kelias
+     * @param outputPath galutinio failo kelias (HTML arba PDF)
+     */
+    public record ExportResult(Path xmlPath, Path outputPath) {
     }
 }

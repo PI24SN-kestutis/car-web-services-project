@@ -16,7 +16,7 @@ import java.util.List;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -50,15 +50,29 @@ class CarControllerTest {
     }
 
     /**
-     * Patikrina, kad HTML eksporto veiksmas atlieka peradresavimą į pagrindinį puslapį.
+     * Patikrina, kad XML eksporto veiksmas atlieka peradresavimą su sėkmės žinute.
+     */
+    @Test
+    void exportsXmlAndRedirectsToIndex() throws Exception {
+        Mockito.when(carService.getAllCars()).thenReturn(List.of());
+        Mockito.when(exportService.exportXml(List.of())).thenReturn(Path.of("output/cars.xml"));
+
+        mockMvc.perform(post("/export/xml"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/?msg=*"));
+    }
+
+    /**
+     * Patikrina, kad HTML eksporto veiksmas atlieka peradresavimą su sėkmės žinute.
      */
     @Test
     void exportsHtmlAndRedirectsToIndex() throws Exception {
         Mockito.when(carService.getAllCars()).thenReturn(List.of());
-        Mockito.when(exportService.exportHtml(List.of())).thenReturn(Path.of("output/cars.html"));
+        Mockito.when(exportService.exportHtml(List.of()))
+                .thenReturn(new ExportService.ExportResult(Path.of("output/cars.xml"), Path.of("output/cars.html")));
 
         mockMvc.perform(post("/export/html"))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/"));
+                .andExpect(redirectedUrlPattern("/?msg=*"));
     }
 }

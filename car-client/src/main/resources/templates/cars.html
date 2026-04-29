@@ -11,6 +11,7 @@
         .error { color: #b00020; }
         .message { color: #0b6b2f; }
         .actions { display: flex; gap: 0.75rem; margin: 1rem 0; }
+        .note { margin-top: 0.25rem; color: #555; }
     </style>
 </head>
 <body>
@@ -22,15 +23,19 @@
 <div th:if="${message}" class="message" th:text="${message}"></div>
 <div th:if="${error}" class="error" th:text="${error}"></div>
 
-<!-- Eksporto veiksmai: sugeneruoja HTML arba PDF failą pagal XML duomenis. -->
+<!-- Eksporto veiksmai: sugeneruoja XML, HTML arba PDF failą pagal duomenis. -->
 <div class="actions">
+    <form method="post" th:action="@{/export/xml}">
+        <button type="submit">Sukurti XML</button>
+    </form>
     <form method="post" th:action="@{/export/html}">
-        <button type="submit">Generate HTML</button>
+        <button type="submit">Sukurti HTML</button>
     </form>
     <form method="post" th:action="@{/export/pdf}">
-        <button type="submit">Generate PDF</button>
+        <button type="submit">Sukurti PDF</button>
     </form>
 </div>
+<p class="note">Pastaba: kuriant HTML arba PDF, pirmiausia reikalingas XML failas.</p>
 
 <table>
     <thead>

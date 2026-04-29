@@ -60,10 +60,11 @@ Pagrindiniame puslapyje matysite automobilių sąrašą.
 
 Mygtukai:
 
-- `Generate HTML` - sukuria `cars.html`
-- `Generate PDF` - sukuria `cars.pdf`
+- `Sukurti XML` - sukuria `cars.xml`
+- `Sukurti HTML` - sukuria `cars.xml` ir `cars.html`
+- `Sukurti PDF` - sukuria `cars.xml` ir `cars.pdf`
 
-Abiem atvejais prieš transformaciją automatiškai sukuriamas `cars.xml`.
+Po kiekvieno veiksmo puslapyje rodoma žinutė apie sukurtus failus.
 
 Sugeneruoti failai saugomi kataloge, nurodytame `carclient.output-dir` (numatytai `output/`).
 
@@ -83,10 +84,11 @@ Sugeneruoti failai saugomi kataloge, nurodytame `carclient.output-dir` (numatyta
 2. `CarController` kviečia `CarService`.
 3. `CarService` per `CarSoapGateway` paima duomenis iš SOAP serverio.
 4. Duomenys konvertuojami į `DTO` ir atvaizduojami `cars.html` (Thymeleaf šablonas).
-5. Vartotojui paspaudus eksporto mygtuką:
-   - `ExportService` sukuria `cars.xml`.
-   - `TransformService` atlieka XSL arba XSL-FO transformaciją.
-   - Gaunamas `cars.html` arba `cars.pdf`.
+5. Vartotojui paspaudus mygtuką:
+   - `Sukurti XML`: `ExportService` sukuria `cars.xml`.
+   - `Sukurti HTML`: `ExportService` sukuria `cars.xml`, `TransformService` sukuria `cars.html`.
+   - `Sukurti PDF`: `ExportService` sukuria `cars.xml`, `TransformService` sukuria `cars.pdf`.
+6. Po peradresavimo pagrindiniame puslapyje parodoma sėkmės arba klaidos žinutė.
 
 ## 7. Testai
 
@@ -102,9 +104,3 @@ Paleidimas:
 ```powershell
 ./mvnw test
 ```
-
-## 8. Koduotė ir lietuviški simboliai
-
-- Rekomenduojama visus failus laikyti `UTF-8` koduote.
-- Jei redaktoriuje matosi neteisingi simboliai (`ąčęėįšųūž`), patikrinkite failo koduotę ir nustatykite `UTF-8`.
-- Šiame projekte dokumentacija ir komentarai pateikti lietuvių kalba, o kodo identifikatoriai palikti anglų kalba.

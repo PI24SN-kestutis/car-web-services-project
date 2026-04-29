@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Car Client Demo</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background: #f5f5f5; text-align: left; }
+        .error { color: #b00020; }
+        .message { color: #0b6b2f; }
+        .actions { display: flex; gap: 0.75rem; margin: 1rem 0; }
+    </style>
+</head>
+<body>
+<!-- Pagrindinis demonstracinis puslapis: rodo automobilių sąrašą iš SOAP serverio. -->
+<h1>Car Client (SOAP + XSL Demo)</h1>
+
+<p>Server endpoint: <code>http://localhost:8080/services/cars?wsdl</code></p>
+
+<div th:if="${message}" class="message" th:text="${message}"></div>
+<div th:if="${error}" class="error" th:text="${error}"></div>
+
+<!-- Eksporto veiksmai: sugeneruoja HTML arba PDF failą pagal XML duomenis. -->
+<div class="actions">
+    <form method="post" th:action="@{/export/html}">
+        <button type="submit">Generate HTML</button>
+    </form>
+    <form method="post" th:action="@{/export/pdf}">
+        <button type="submit">Generate PDF</button>
+    </form>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Make</th>
+        <th>Model</th>
+        <th>Year</th>
+        <th>Price</th>
+        <th>Available</th>
+        <th>Color Code</th>
+        <th>Parts Count</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="car : ${cars}">
+        <td th:text="${car.id}"></td>
+        <td th:text="${car.make}"></td>
+        <td th:text="${car.model}"></td>
+        <td th:text="${car.year}"></td>
+        <td th:text="${car.price}"></td>
+        <td th:text="${car.available}"></td>
+        <td th:text="${car.colorCode}"></td>
+        <td th:text="${#lists.size(car.parts)}"></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
+

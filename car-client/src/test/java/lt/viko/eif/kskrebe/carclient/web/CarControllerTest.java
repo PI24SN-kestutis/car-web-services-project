@@ -1,9 +1,12 @@
 package lt.viko.eif.kskrebe.carclient.web;
 
+import lt.viko.eif.kskrebe.carclient.dto.CarFilterForm;
+import lt.viko.eif.kskrebe.carclient.dto.CarForm;
 import lt.viko.eif.kskrebe.carclient.dto.CarView;
 import lt.viko.eif.kskrebe.carclient.service.CarService;
 import lt.viko.eif.kskrebe.carclient.service.ExportService;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -40,13 +43,39 @@ class CarControllerTest {
      */
     @Test
     void showsCarsPage() throws Exception {
-        Mockito.when(carService.getAllCars())
+        Mockito.when(carService.getAllCars(ArgumentMatchers.any(CarFilterForm.class)))
                 .thenReturn(List.of(new CarView(1L, "Audi", "A4", 2020, 1000f, true, 'A', List.of())));
 
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("cars"))
-                .andExpect(model().attributeExists("cars"));
+                .andExpect(model().attributeExists("cars"))
+                .andExpect(model().attributeExists("filter"));
+    }
+
+    @Test
+    void opensNewCarForm() throws Exception {
+        Mockito.when(carService.createEmptyForm()).thenReturn(new CarForm());
+
+        mockMvc.perform(get("/cars/new"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("car-form"))
+                .andExpect(model().attributeExists("carForm"));
+    }
+
+    @Test
+    void savesCarAndRedirects() throws Exception {
+        Mockito.when(carService.upsertCar(ArgumentMatchers.any(CarForm.class)))
+                .thenReturn(new CarView(10L, "Audi", "A5", 2021, 20000f, true, 'A', List.of()));
+
+        mockMvc.perform(post("/cars")
+                        .param("make", "Audi")
+                        .param("model", "A5")
+                        .param("year", "2021")
+                        .param("price", "20000")
+                        .param("colorCode", "A"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrlPattern("/?msg=*"));
     }
 
     /**

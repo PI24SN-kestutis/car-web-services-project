@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="lt" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Automobilio forma</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        .grid { display: grid; grid-template-columns: repeat(2, minmax(180px, 320px)); gap: 0.75rem; }
+        input, button { padding: 0.35rem; }
+        table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background: #f5f5f5; text-align: left; }
+        .actions { margin-top: 1rem; display: flex; gap: 0.75rem; }
+    </style>
+</head>
+<body>
+<h1 th:text="${carForm.id == null} ? 'Naujas automobilis' : 'Redaguoti automobilį'">Automobilio forma</h1>
+
+<form method="post" th:action="@{/cars}" th:object="${carForm}">
+    <input type="hidden" th:field="*{id}"/>
+
+    <div class="grid">
+        <label>Gamintojas
+            <input type="text" th:field="*{make}" required/>
+        </label>
+        <label>Modelis
+            <input type="text" th:field="*{model}" required/>
+        </label>
+        <label>Metai
+            <input type="number" th:field="*{year}" min="1886" max="2100" required/>
+        </label>
+        <label>Kaina
+            <input type="number" th:field="*{price}" min="0" step="0.01" required/>
+        </label>
+        <label>Prieinamas
+            <input type="checkbox" th:field="*{available}"/>
+        </label>
+        <label>Spalvos kodas (1 simbolis)
+            <input type="text" th:field="*{colorCode}" maxlength="1" required/>
+        </label>
+    </div>
+
+    <h2>Detalės</h2>
+    <p>Detalės redaguojamos kartu su automobiliu. Galima pridėti naują detalę.</p>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Pavadinimas</th>
+            <th>Numeris</th>
+            <th>Kaina</th>
+            <th>Kiekis</th>
+            <th>Prieinama</th>
+            <th>Veiksmas</th>
+        </tr>
+        </thead>
+        <tbody id="partsBody">
+        <tr th:each="part, iter : *{parts}">
+            <td>
+                <input type="hidden" th:name="|parts[${iter.index}].id|" th:value="${part.id}"/>
+                <input type="text" th:name="|parts[${iter.index}].name|" th:value="${part.name}"/>
+            </td>
+            <td><input type="text" th:name="|parts[${iter.index}].partNumber|" th:value="${part.partNumber}"/></td>
+            <td><input type="number" min="0" step="0.01" th:name="|parts[${iter.index}].price|" th:value="${part.price}"/></td>
+            <td><input type="number" min="0" step="1" th:name="|parts[${iter.index}].quantity|" th:value="${part.quantity}"/></td>
+            <td>
+                <input type="hidden" th:name="|parts[${iter.index}].available|" value="false"/>
+                <input type="checkbox" th:name="|parts[${iter.index}].available|" th:checked="${part.available}" value="true"/>
+            </td>
+            <td><button type="button" onclick="removePartRow(this)">Šalinti</button></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="actions">
+        <button type="button" onclick="addPartRow()">+ Pridėti detalę</button>
+        <button type="submit">Išsaugoti</button>
+        <a th:href="@{/}">Atgal</a>
+    </div>
+</form>
+
+<script>
+    function addPartRow() {
+        const body = document.getElementById('partsBody');
+        const index = body.querySelectorAll('tr').length;
+        const row = document.createElement('tr');
+        row.innerHTML =
+            '<td>' +
+            '<input type="hidden" name="parts[' + index + '].id" />' +
+            '<input type="text" name="parts[' + index + '].name" />' +
+            '</td>' +
+            '<td><input type="text" name="parts[' + index + '].partNumber" /></td>' +
+            '<td><input type="number" min="0" step="0.01" name="parts[' + index + '].price" /></td>' +
+            '<td><input type="number" min="0" step="1" name="parts[' + index + '].quantity" /></td>' +
+            '<td>' +
+            '<input type="hidden" name="parts[' + index + '].available" value="false" />' +
+            '<input type="checkbox" name="parts[' + index + '].available" value="true" />' +
+            '</td>' +
+            '<td><button type="button" onclick="removePartRow(this)">Šalinti</button></td>';
+        body.appendChild(row);
+    }
+
+    function removePartRow(button) {
+        const row = button.closest('tr');
+        row.remove();
+        reindexPartRows();
+    }
+
+    function reindexPartRows() {
+        const rows = document.querySelectorAll('#partsBody tr');
+        rows.forEach((row, index) => {
+            const inputs = row.querySelectorAll('input');
+            inputs.forEach((input) => {
+                if (input.name) {
+                    input.name = input.name.replace(/parts\[\d+]/, 'parts[' + index + ']');
+                }
+            });
+        });
+    }
+</script>
+</body>
+</html>
+

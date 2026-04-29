@@ -37,6 +37,41 @@ public class WsimportCarSoapGateway implements CarSoapGateway {
     @Override
     public List<Car> getAllCars() {
         try {
+            return createPort().getAllCars();
+        } catch (WebServiceException exception) {
+            throw new IllegalStateException("Cannot connect to SOAP server. Is carserver running?", exception);
+        }
+    }
+
+    @Override
+    public Car getCarById(Long id) {
+        try {
+            return createPort().getCarById(id);
+        } catch (WebServiceException exception) {
+            throw new IllegalStateException("Cannot connect to SOAP server. Is carserver running?", exception);
+        }
+    }
+
+    @Override
+    public Car upsertCar(Car car) {
+        try {
+            return createPort().addCar(car);
+        } catch (WebServiceException exception) {
+            throw new IllegalStateException("Cannot connect to SOAP server. Is carserver running?", exception);
+        }
+    }
+
+    @Override
+    public void deleteCar(Long id) {
+        try {
+            createPort().deleteCar(id);
+        } catch (WebServiceException exception) {
+            throw new IllegalStateException("Cannot connect to SOAP server. Is carserver running?", exception);
+        }
+    }
+
+    private CarWebService createPort() {
+        try {
             URL wsdl = URI.create(soapProperties.wsdlUrl()).toURL();
             QName serviceQName = new QName(soapProperties.namespace(), soapProperties.serviceName());
             CarService service = new CarService(wsdl, serviceQName);
@@ -45,11 +80,9 @@ public class WsimportCarSoapGateway implements CarSoapGateway {
                     BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
                     soapProperties.wsdlUrl().replace("?wsdl", "")
             );
-            return port.getAllCars();
+            return port;
         } catch (MalformedURLException exception) {
             throw new IllegalStateException("Invalid WSDL URL in application properties.", exception);
-        } catch (WebServiceException exception) {
-            throw new IllegalStateException("Cannot connect to SOAP server. Is carserver running?", exception);
         }
     }
 }

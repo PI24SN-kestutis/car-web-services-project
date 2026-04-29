@@ -1,11 +1,15 @@
 package lt.viko.eif.kskrebe.carclient.web;
 
+import lt.viko.eif.kskrebe.carclient.dto.CarFilterForm;
+import lt.viko.eif.kskrebe.carclient.dto.CarForm;
 import lt.viko.eif.kskrebe.carclient.dto.CarView;
 import lt.viko.eif.kskrebe.carclient.service.CarService;
 import lt.viko.eif.kskrebe.carclient.service.ExportService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -36,6 +40,7 @@ public class CarController {
      * Atvaizduoja pagrindinį puslapį su automobilių lentele.
      *
      * @param model modelis duomenų perdavimui į Thymeleaf šabloną
+     * @param filter paieškos ir filtrų forma
      * @param message vienkartinė sėkmės žinutė iš query parametro
      * @param requestError vienkartinė klaidos žinutė iš query parametro
      * @return šablono pavadinimas
@@ -43,12 +48,13 @@ public class CarController {
     @GetMapping("/")
     public String cars(
             Model model,
+            @ModelAttribute("filter") CarFilterForm filter,
             @RequestParam(value = "msg", required = false) String message,
             @RequestParam(value = "err", required = false) String requestError
     ) {
         String pageError = requestError;
         try {
-            List<CarView> cars = carService.getAllCars();
+            List<CarView> cars = carService.getAllCars(filter);
             model.addAttribute("cars", cars);
         } catch (Exception exception) {
             model.addAttribute("cars", List.of());
@@ -59,6 +65,54 @@ public class CarController {
         model.addAttribute("message", message);
         model.addAttribute("error", pageError);
         return "cars";
+    }
+
+    /**
+     * Atidaro naujo automobilio formą.
+     */
+    @GetMapping("/cars/new")
+    public String newCar(Model model) {
+        model.addAttribute("carForm", carService.createEmptyForm());
+        return "car-form";
+    }
+
+    /**
+     * Atidaro automobilio redagavimo formą.
+     */
+    @GetMapping("/cars/{id}/edit")
+    public String editCar(@PathVariable("id") Long id, Model model) {
+        try {
+            model.addAttribute("carForm", carService.getCarFormById(id));
+            return "car-form";
+        } catch (Exception exception) {
+            return "redirect:/?err=" + encode(exception.getMessage());
+        }
+    }
+
+    /**
+     * Išsaugo automobilį (create/update per upsert logiką).
+     */
+    @PostMapping("/cars")
+    public String saveCar(@ModelAttribute("carForm") CarForm form) {
+        try {
+            CarView saved = carService.upsertCar(form);
+            return "redirect:/?msg=" + encode("Automobilis išsaugotas: ID " + saved.id());
+        } catch (Exception exception) {
+            return "redirect:/?err=" + encode(exception.getMessage());
+        }
+    }
+
+    /**
+     * Pašalina automobilį.
+     */
+    @PostMapping("/cars/{id}/delete")
+    public String deleteCar(@PathVariable("id") Long id) {
+        try {
+            carService.deleteCar(id);
+            return "redirect:/?msg=" + encode("Automobilis pašalintas: ID " + id);
+        } catch (Exception exception) {
+            return "redirect:/?err=" + encode(exception.getMessage());
+        }
     }
 
     /**

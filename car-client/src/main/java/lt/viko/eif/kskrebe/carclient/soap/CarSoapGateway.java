@@ -18,4 +18,27 @@ public interface CarSoapGateway {
      * @return SOAP modelio automobilių sąrašas
      */
     List<Car> getAllCars();
+
+    /**
+     * Grąžina vieną automobilį pagal identifikatorių.
+     *
+     * @param id automobilio identifikatorius
+     * @return automobilis, jei rastas
+     */
+    Car getCarById(Long id);
+
+    /**
+     * Sukuria arba atnaujina automobilį (upsert).
+     *
+     * @param car SOAP automobilio objektas
+     * @return iš serverio grąžintas automobilis po išsaugojimo
+     */
+    Car upsertCar(Car car);
+
+    /**
+     * Pašalina automobilį pagal identifikatorių.
+     *
+     * @param id automobilio identifikatorius
+     */
+    void deleteCar(Long id);
 }

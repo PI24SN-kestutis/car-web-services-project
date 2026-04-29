@@ -1,16 +1,17 @@
 # `carclient` naudotojo vadovas
 
-Šis projektas yra minimali kliento pusės demonstracija užduočiai apie JAX-WS web servisus ir XSL transformacijas.
+Šis projektas yra kliento pusės demonstracija užduočiai apie JAX-WS web servisus ir XSL transformacijas.
 
 ## 1. Projekto tikslas
 
 Programa:
 
 1. Prisijungia prie SOAP serverio (`carserver`) pagal WSDL.
-2. Parodo automobilių duomenis `Thymeleaf` puslapyje.
-3. Sugeneruoja XML failą iš gautų duomenų.
-4. Transformuoja XML į HTML su XSL.
-5. Transformuoja XML į PDF su XSL-FO.
+2. Leidžia valdyti automobilius (CRUD) kartu su jų detalėmis.
+3. Turi paiešką ir filtrus automobilių sąrašui.
+4. Sugeneruoja XML failą iš gautų duomenų.
+5. Transformuoja XML į HTML su XSL.
+6. Transformuoja XML į PDF su XSL-FO.
 
 ## 2. Reikalavimai paleidimui
 
@@ -56,15 +57,27 @@ Pagrindinės savybės:
 
 ## 5. Naudojimas
 
-Pagrindiniame puslapyje matysite automobilių sąrašą.
+Pagrindiniame puslapyje:
 
-Mygtukai:
+- matysite automobilių sąrašą,
+- galėsite filtruoti pagal paiešką, prieinamumą ir kainą,
+- galėsite kurti naują automobilį ir redaguoti esamą,
+- detalės redaguojamos kartu su automobiliu vienoje formoje.
+
+CRUD veiksmai:
+
+- `+ Naujas automobilis` - atidaro kūrimo formą
+- `Redaguoti` - atidaro redagavimo formą
+- `Šalinti` - pašalina automobilį
+- Išsaugojimas vyksta per **upsert** logiką (`addCar` SOAP operacija)
+
+Eksporto mygtukai:
 
 - `Sukurti XML` - sukuria `cars.xml`
 - `Sukurti HTML` - sukuria `cars.xml` ir `cars.html`
 - `Sukurti PDF` - sukuria `cars.xml` ir `cars.pdf`
 
-Po kiekvieno veiksmo puslapyje rodoma žinutė apie sukurtus failus.
+Po kiekvieno veiksmo puslapyje rodoma žinutė apie rezultatą.
 
 Sugeneruoti failai saugomi kataloge, nurodytame `carclient.output-dir` (numatytai `output/`).
 
@@ -72,32 +85,29 @@ Sugeneruoti failai saugomi kataloge, nurodytame `carclient.output-dir` (numatyta
 
 ### 6.1. Sluoksniai
 
-- `web` - HTTP užklausos ir Thymeleaf puslapis (`CarController`)
-- `service` - verslo logika ir eksporto valdymas (`CarService`, `ExportService`, `XmlExportService`, `TransformService`)
+- `web` - HTTP maršrutai, CRUD, filtrai, eksportas (`CarController`)
+- `service` - verslo logika, mapinimas, upsert, filtravimas, eksportas (`CarService`, `ExportService`, `XmlExportService`, `TransformService`)
 - `soap` - ryšys su SOAP paslauga (`CarSoapGateway`, `WsimportCarSoapGateway`)
-- `dto` - duomenų objektai vaizdavimui (`CarView`, `CarPartView`)
+- `dto` - vaizdavimo ir formų objektai (`CarView`, `CarPartView`, `CarForm`, `CarPartForm`, `CarFilterForm`)
 - `config` - konfigūracijos nuskaitymas (`SoapProperties`)
 
 ### 6.2. Duomenų srautas
 
 1. Vartotojas atidaro `/`.
-2. `CarController` kviečia `CarService`.
+2. `CarController` kviečia `CarService` ir pritaiko filtrus.
 3. `CarService` per `CarSoapGateway` paima duomenis iš SOAP serverio.
-4. Duomenys konvertuojami į `DTO` ir atvaizduojami `cars.html` (Thymeleaf šablonas).
-5. Vartotojui paspaudus mygtuką:
-   - `Sukurti XML`: `ExportService` sukuria `cars.xml`.
-   - `Sukurti HTML`: `ExportService` sukuria `cars.xml`, `TransformService` sukuria `cars.html`.
-   - `Sukurti PDF`: `ExportService` sukuria `cars.xml`, `TransformService` sukuria `cars.pdf`.
-6. Po peradresavimo pagrindiniame puslapyje parodoma sėkmės arba klaidos žinutė.
+4. Vartotojas kuria/redaguoja automobilį formoje `car-form.html`.
+5. `CarController` kviečia `CarService.upsertCar(...)`, kuris SOAP pusėje kviečia `addCar` (upsert).
+6. Eksporto metu `ExportService` sukuria XML, o `TransformService` sukuria HTML/PDF.
 
 ## 7. Testai
 
 Projektas turi minimalius testus:
 
 - Spring konteksto testas
-- Serviso mapinimo testas
+- Serviso mapinimo/upsert testai
 - Transformacijų testas (HTML/PDF failų generavimas)
-- MVC valdiklio testas
+- MVC valdiklio testai
 
 Paleidimas:
 

@@ -2,7 +2,7 @@
 Monorepo struktura `Car Web Services` darbui.
 ## Projektai
 - `car-server/` - Spring Boot + JAX-WS + H2 serverio dalis (SOAP paslauga)
-- `car-client/` - bus pridetina veliau (SOAP klientas, wsimport, XSL transformacijos)
+- `car-client/` - (SOAP klientas, wsimport, XSL transformacijos)
 ## Greitas startas (serveriui)
 ```powershell
 cd car-server
